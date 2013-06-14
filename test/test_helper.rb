@@ -37,6 +37,7 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
   def setup_case
+    setup_h2ocases_user
     @case = Case.create!(:short_name => 'first case', :content => 'first_content')
   end
 
@@ -80,4 +81,12 @@ class ActiveSupport::TestCase
     @role = Role.create!(:name => 'creators')
   end
 
+  def setup_h2ocases_user
+    u = User.new(:login => 'h2ocases',
+                 :email_address => 'h2ocases@harvard.edu',
+                 :password => 'password',
+                 :password_confirmation => 'password')
+    u.save false
+
+  end
 end
