@@ -65,6 +65,7 @@ class ActiveSupport::TestCase
     @annotation.annotation = "content"
     @annotation.annotation_start = "T1"
     @annotation.annotation_end = "T100"
+    @annotation.content = "first content"
     @annotation.save!
   end
 
@@ -72,6 +73,7 @@ class ActiveSupport::TestCase
     @collage_link = CollageLink.new
     @collage_link.link_text_start = "T1"
     @collage_link.link_text_end = "T2"
+    @collage_link.content = "collage link content"
     @collage_link.host_collage = host_collage if host_collage
     @collage_link.linked_collage = linked_collage if linked_collage
     @collage_link.save!
