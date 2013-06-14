@@ -60,26 +60,18 @@ class ActiveSupport::TestCase
 
   def setup_annotation
     @annotation = Annotation.new
-<<<<<<< HEAD
     @annotation.collage = @collage
     @annotation.annotated_content = "first content"
     @annotation.annotation = "content"
     @annotation.annotation_start = "T1"
     @annotation.annotation_end = "T100"
-=======
-    @annotation.content = "first content"
->>>>>>> make unit tests for versioning case pass
     @annotation.save!
   end
 
   def setup_collage_link(host_collage = nil, linked_collage = nil)
     @collage_link = CollageLink.new
-<<<<<<< HEAD
     @collage_link.link_text_start = "T1"
     @collage_link.link_text_end = "T2"
-=======
-    @collage_link.content = "collage link content"
->>>>>>> make unit tests for versioning case pass
     @collage_link.host_collage = host_collage if host_collage
     @collage_link.linked_collage = linked_collage if linked_collage
     @collage_link.save!
@@ -94,7 +86,6 @@ class ActiveSupport::TestCase
     @role = Role.create!(:name => 'creators')
   end
 
-<<<<<<< HEAD
   def setup_h2ocases_user
     u = User.new(:login => 'h2ocases',
                  :email_address => 'h2ocases@harvard.edu',
@@ -103,6 +94,4 @@ class ActiveSupport::TestCase
     u.save false
 
   end
-=======
->>>>>>> make unit tests for versioning case pass
 end
