@@ -17,7 +17,7 @@ class ActiveSupport::TestCase
   # don't care one way or the other, switching from MyISAM to InnoDB tables
   # is recommended.
   #
-  # The only drawback to using transactional fixtures is when you actually 
+  # The only drawback to using transactional fixtures is when you actually
   # need to test transactions.  Since your test is bracketed by a transaction,
   # any transactions started in your code will be automatically rolled back.
   self.use_transactional_fixtures = true
@@ -36,4 +36,48 @@ class ActiveSupport::TestCase
 #  fixtures :all
 
   # Add more helper methods to be used by all tests here...
+  def setup_case
+    @case = Case.create!(:short_name => 'first case', :content => 'first_content')
+  end
+
+  def setup_collage(name = "first", content = "first", collage_arg = nil)
+    collage = Collage.new
+    collage.name = name
+    collage.annotatable = @case
+    collage.content = content
+    collage.save!
+    @collage = collage if collage_arg.nil?
+    collage
+  end
+
+  def setup_case_jurisdiction
+    @case_jurisdiction = CaseJurisdiction.new
+    @case_jurisdiction.abbreviation = "abbv"
+    @case_jurisdiction.name = "first"
+    @case_jurisdiction.save!
+  end
+
+  def setup_annotation
+    @annotation = Annotation.new
+    @annotation.content = "first content"
+    @annotation.save!
+  end
+
+  def setup_collage_link(host_collage = nil, linked_collage = nil)
+    @collage_link = CollageLink.new
+    @collage_link.content = "collage link content"
+    @collage_link.host_collage = host_collage if host_collage
+    @collage_link.linked_collage = linked_collage if linked_collage
+    @collage_link.save!
+  end
+
+  def setup_user(name = 'testuser')
+    @user = User.create!(:login => name)
+    @user
+  end
+
+  def setup_role
+    @role = Role.create!(:name => 'creators')
+  end
+
 end

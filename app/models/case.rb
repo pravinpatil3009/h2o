@@ -17,16 +17,18 @@ class Case < ActiveRecord::Base
   }
 
   acts_as_authorization_object
-
   acts_as_taggable_on :tags
 
   has_many :case_citations
   has_many :case_docket_numbers
   belongs_to :case_request
   belongs_to :case_jurisdiction
-  has_many :annotations, :through => :collages
   has_many :collages, :as => :annotatable, :dependent => :destroy
+  has_many :annotations, :through => :collages
   has_many :defects, :as => :reportable
+
+  acts_as_versioned_with_associations
+
   accepts_nested_attributes_for :case_citations,
     :allow_destroy => true,
     :reject_if => proc { |att| att['volume'].blank? || att['reporter'].blank? || att['page'].blank? }

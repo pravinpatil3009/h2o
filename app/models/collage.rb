@@ -250,7 +250,6 @@ class Collage < ActiveRecord::Base
       end
     end
   end
-
   alias :to_s :display_name
 
   private

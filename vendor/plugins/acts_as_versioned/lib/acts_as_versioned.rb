@@ -1,5 +1,5 @@
 # Copyright (c) 2005 Rick Olson
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -7,10 +7,10 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -21,7 +21,7 @@
 
 module ActiveRecord #:nodoc:
   module Acts #:nodoc:
-    # Specify this act if you want to save a copy of the row in a versioned table.  This assumes there is a 
+    # Specify this act if you want to save a copy of the row in a versioned table.  This assumes there is a
     # versioned table ready and that your model has a version field.  This works with optimistic locking if the lock_version
     # column is present as well.
     #
@@ -55,7 +55,7 @@ module ActiveRecord #:nodoc:
     #
     # Simple Queries to page between versions
     #
-    #   page.versions.before(version) 
+    #   page.versions.before(version)
     #   page.versions.after(version)
     #
     # Access the previous/next versions from the versioned model itself
@@ -70,11 +70,11 @@ module ActiveRecord #:nodoc:
       def self.included(base) # :nodoc:
         base.extend ClassMethods
       end
-      
-    
-      
-      module ClassMethods        
-        
+
+
+
+      module ClassMethods
+
         # == Configuration options
         #
         # * <tt>class_name</tt> - versioned model class name (default: PageVersion in the above example)
@@ -130,14 +130,14 @@ module ActiveRecord #:nodoc:
         #
         # == Database Schema
         #
-        # The model that you're versioning needs to have a 'version' attribute. The model is versioned 
-        # into a table called #{model}_versions where the model name is singlular. The _versions table should 
+        # The model that you're versioning needs to have a 'version' attribute. The model is versioned
+        # into a table called #{model}_versions where the model name is singlular. The _versions table should
         # contain all the fields you want versioned, the same version column, and a #{model}_id foreign key field.
         #
         # A lock_version field is also accepted if your model uses Optimistic Locking.  If your table uses Single Table inheritance,
         # then that field is reflected in the versioned model as 'versioned_type' by default.
         #
-        # Acts_as_versioned comes prepared with the ActiveRecord::Acts::Versioned::ActMethods::ClassMethods#create_versioned_table 
+        # Acts_as_versioned comes prepared with the ActiveRecord::Acts::Versioned::ActMethods::ClassMethods#create_versioned_table
         # method, perfect for a migration.  It will also create the version column if the main model does not already have it.
         #
         #   class AddVersions < ActiveRecord::Migration
@@ -146,16 +146,16 @@ module ActiveRecord #:nodoc:
         #       # that create_table does
         #       Post.create_versioned_table
         #     end
-        # 
+        #
         #     def self.down
         #       Post.drop_versioned_table
         #     end
         #   end
-        # 
+        #
         # == Changing What Fields Are Versioned
         #
-        # By default, acts_as_versioned will version all but these fields: 
-        # 
+        # By default, acts_as_versioned will version all but these fields:
+        #
         #   [self.primary_key, inheritance_column, 'version', 'lock_version', versioned_inheritance_column]
         #
         # You can add or change those by modifying #non_versioned_columns.  Note that this takes strings and not symbols.
@@ -164,42 +164,42 @@ module ActiveRecord #:nodoc:
         #     acts_as_versioned
         #     self.non_versioned_columns << 'comments_count'
         #   end
-        # 
+        #
 
         REJECTED_ASSOCIATIONS = [:versions, :tag, :layer_taggings, :taggables, :taggings, :tagging, :taggable, :tags,
                                  :tag_taggings, :base_tags, :playlist, :playlists, :playlist_item, :playlist_items,
                                  :users, :user, :roles_users, :role, :roles, :accepted_roles, :user_collections, :defects]
         def acts_as_versioned(options = {}, &extension)
-          
-  
-          
+
+
+
           # don't allow multiple calls
           return if self.included_modules.include?(ActiveRecord::Acts::Versioned::ActMethods)
-          
-          
+
+
           def self.white_listed_associations(macro = nil)
             res = self.reflect_on_all_associations(macro)
             res = res.reject{|association| association.options.has_key?(:through)}
             REJECTED_ASSOCIATIONS.each do |reject|
               res = res.reject{|association| association.name == reject}
             end
-            res = res.reject{|association| association.options[:readonly]}            
+            res = res.reject{|association| association.options[:readonly]}
             res
           end
-          
+
           def self.has_many_associations
-            [:has_many, :has_one].inject([]) do |arr, macro| 
+            [:has_many, :has_one].inject([]) do |arr, macro|
               arr + self.white_listed_associations(macro)
-            end           
+            end
           end
-          
+
           def self.has_and_belongs_to_many_associations
-            [:has_and_belongs_to_many].inject([]) do |arr, macro| 
+            [:has_and_belongs_to_many].inject([]) do |arr, macro|
               arr + self.white_listed_associations(macro)
-            end           
-            
+            end
+
           end
-          
+
           def self.belongs_to_associations
             self.white_listed_associations(:belongs_to)
           end
@@ -212,19 +212,19 @@ module ActiveRecord #:nodoc:
           def self.has_and_belongs_to_many_versioned_associations
             self.versioned_associations(:has_and_belongs_to_many)
           end
-          
+
           def self.has_many_versioned_associations
             self.versioned_associations
           end
 
           def self.belongs_to_versioned_associations
             self.versioned_associations(:belongs_to)
-          end          
-          
+          end
+
           send :include, ActiveRecord::Acts::Versioned::ActMethods
 
 
-          cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column, 
+          cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
             :version_column, :max_version_limit, :track_altered_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
             :version_association_options, :version_if_changed
 
@@ -251,9 +251,9 @@ module ActiveRecord #:nodoc:
 
             options[:extend] = self.const_get(extension_module_name)
           end
-          
-          
-          
+
+
+
           class_eval <<-CLASS_METHODS
             attr_accessor :copy
             has_many :versions, version_association_options do
@@ -280,7 +280,7 @@ module ActiveRecord #:nodoc:
             include options[:extend] if options[:extend].is_a?(Module)
 
           CLASS_METHODS
-          
+
           # create the dynamic versioned model
           const_set(versioned_class_name, Class.new(ActiveRecord::Base)).class_eval do
             def self.reloadable? ; false ; end
@@ -314,13 +314,13 @@ module ActiveRecord #:nodoc:
           versioned_class.set_table_name versioned_table_name
           versioned_class.send :include, options[:extend]         if options[:extend].is_a?(Module)
           versioned_class.set_sequence_name version_sequence_name if version_sequence_name
-          
-          
-        
+
+
+
           self.reflect_on_all_associations.each do |association|
-            alias_method("orig_#{association.name.to_s}".to_sym, association.name) 
+            alias_method("orig_#{association.name.to_s}".to_sym, association.name)
           end
-          
+
           def self.shallow_copy(version_model, new_model = self.new)
             self.columns.each do |col|
               new_model.send("#{col.name}=", version_model.send(col.name)) if version_model.has_attribute?(col.name)
@@ -331,17 +331,17 @@ module ActiveRecord #:nodoc:
             new_model.instance_variable_set('@new_record', false)
             new_model
           end
-          
+
           def self.copy_by_id_and_version(id, version)
             obj = self.find(id)
             version = obj.versions.find_by_version(version)
             new_copy = self.shallow_copy(version)
             new_copy
           end
-          
-          self.belongs_to_versioned_associations.each do |association|          
+
+          self.belongs_to_versioned_associations.each do |association|
             define_method(association.name) do
-              
+
               if self.copy?
                 if association.polymorphic?
                   return nil if self.original.annotatable.nil?
@@ -357,24 +357,24 @@ module ActiveRecord #:nodoc:
                   local_foreign_key = association_klass.versioned_foreign_key
                   local_version = "#{association_klass.to_s.underscore}_version"
                 end
-                 found_version = belongs_to_versioned_class.find :first, :conditions => ["#{belongs_to_foreign_key} = ? 
+                 found_version = belongs_to_versioned_class.find :first, :conditions => ["#{belongs_to_foreign_key} = ?
                                                                                AND version = ?", self.send(local_foreign_key),
-                                                                                                 self.send(local_version)]                                                          
+                                                                                                 self.send(local_version)]
                  if found_version
-                   association_klass.shallow_copy(found_version)                                                                           
+                   association_klass.shallow_copy(found_version)
                  else
                   nil
                  end
               else
                 self.send("orig_#{association.name.to_s}")
-              end            
-              
+              end
+
             end
-            
+
           end
-          
-          self.has_and_belongs_to_many_versioned_associations.each do |association|          
-            if association.polymorphic?          
+
+          self.has_and_belongs_to_many_versioned_associations.each do |association|
+            if association.polymorphic?
               parent_foreign_key = "#{association.options[:as]}_id"
               parent_version = "#{association.options[:as]}_version"
             elsif association.options.has_key?(:foreign_key)
@@ -384,9 +384,9 @@ module ActiveRecord #:nodoc:
               parent_foreign_key = "#{self.to_s.underscore}_id"
               parent_version = "#{self.to_s.underscore}_version"
             end
-            
+
             define_method(association.name) do
-                if self.copy? 
+                if self.copy?
                   sql = "SELECT tb1.*
                          FROM #{association.klass.versioned_table_name} tb1
                          INNER JOIN #{association.options[:join_table]}_versions tb2
@@ -394,8 +394,8 @@ module ActiveRecord #:nodoc:
                          AND tb1.version = tb2.#{association.association_foreign_key.gsub("_id", '')}_version
                          WHERE tb2.#{association.primary_key_name} = #{self.id}
                          AND tb2.#{association.primary_key_name.gsub("_id", '')}_version = #{self.version}"
-                         
-                         
+
+
                   found_versions = association.klass.version_association_options[:class_name].constantize.find_by_sql(sql)
 
                   if found_versions.any?
@@ -407,30 +407,30 @@ module ActiveRecord #:nodoc:
                   self.send("orig_#{association.name.to_s}")
                 end
             end
-            
-            
+
+
             class_methods =  <<-CLASS_METHODS
-            
-            after_save :update_#{association.options[:join_table]}_versions              
+
+            after_save :update_#{association.options[:join_table]}_versions
 
             CLASS_METHODS
             self.class_eval(class_methods)
-            
+
             define_method("update_#{association.options[:join_table]}_versions") do
               if self.save_version?
-                self.send(association.name).each do |obj|              
-                  sql = "SELECT * FROM #{association.options[:join_table]}_versions 
+                self.send(association.name).each do |obj|
+                  sql = "SELECT * FROM #{association.options[:join_table]}_versions
                          WHERE #{association.primary_key_name} = #{self.id}
                          AND   #{association.association_foreign_key} = #{obj.id}
                          AND   #{association.primary_key_name.gsub("_id", '')}_version = #{self.version}
                          AND   #{association.association_foreign_key.gsub("_id", '')}_version = #{obj.version};"
-                       
+
                   result = self.connection.execute(sql)
                   row_count = result.respond_to?(:num_rows) ? result.num_rows : result.num_tuples
-                  if row_count == 0 
-                    sql = "INSERT INTO #{association.options[:join_table]}_versions 
-                           (#{association.primary_key_name}, #{association.association_foreign_key}, #{association.primary_key_name.gsub("_id", '')}_version, #{association.association_foreign_key.gsub("_id", '')}_version) 
-                           VALUES 
+                  if row_count == 0
+                    sql = "INSERT INTO #{association.options[:join_table]}_versions
+                           (#{association.primary_key_name}, #{association.association_foreign_key}, #{association.primary_key_name.gsub("_id", '')}_version, #{association.association_foreign_key.gsub("_id", '')}_version)
+                           VALUES
                            ( #{self.id},#{obj.id}, #{self.version}, #{obj.version});"
                     self.connection.execute(sql)
                   end
@@ -442,9 +442,9 @@ module ActiveRecord #:nodoc:
             insert_sql += ' VALUES ( #{self.id}, #{record.id}, #{self.version}, #{record.version})'
             association.options[:insert_sql] = insert_sql
           end
-          
+
           self.has_many_versioned_associations.each do |association|
-            if association.polymorphic?          
+            if association.polymorphic?
               parent_foreign_key = "#{association.options[:as]}_id"
               parent_version = "#{association.options[:as]}_version"
             elsif association.options.has_key?(:foreign_key)
@@ -454,9 +454,9 @@ module ActiveRecord #:nodoc:
               parent_foreign_key = "#{self.to_s.underscore}_id"
               parent_version = "#{self.to_s.underscore}_version"
             end
-            
+
             define_method(association.name) do
-                if self.copy? 
+                if self.copy?
                   sql = "SELECT tb1.*
                          FROM #{association.klass.versioned_table_name} tb1
                          INNER JOIN
@@ -467,7 +467,6 @@ module ActiveRecord #:nodoc:
                              GROUP BY #{association.klass.versioned_foreign_key}, #{parent_foreign_key}, #{parent_version}
                              ) groupedtbl ON tb1.#{association.klass.versioned_foreign_key} = groupedtbl.#{association.klass.versioned_foreign_key} AND tb1.version = groupedtbl.MaxVersion;"
                   found_versions = association.klass.versioned_class.find_by_sql(sql)
-                  #puts sql
                   if found_versions.any?
                     found_versions.inject([]){|arr, found_version| arr << association.klass.shallow_copy(found_version)}
                   else
@@ -478,7 +477,7 @@ module ActiveRecord #:nodoc:
                 end
 
             end
-                      
+
             define_method(:versions) do
               if self.copy?
                 self.original.versions
@@ -486,22 +485,22 @@ module ActiveRecord #:nodoc:
                 self.send("orig_versions")
               end
             end
-            
-            if association.polymorphic? 
+
+            if association.polymorphic?
               parent_klass = association.polymorphic_name.to_s
             elsif association.options[:foreign_key]
               parent_klass = association.options[:foreign_key].gsub("_id", '')
             else
               parent_klass = self.to_s.underscore
-            end                  
+            end
 
             class_methods =  <<-CLASS_METHODS
-            
+
             before_validation :update_#{parent_klass}_version_number
             unless self.instance_methods.include?("update_#{parent_klass}_version_number")
               def update_#{parent_klass}_version_number
                 if self.#{parent_klass}
-                    self.#{parent_klass}.reload 
+                    self.#{parent_klass}.reload
                     if self.#{parent_klass}.respond_to?(:version)
                       self.#{parent_klass}_version = self.#{parent_klass}.version
                     end
@@ -519,53 +518,54 @@ module ActiveRecord #:nodoc:
                 target.send("#{parent_klass}_version=", self.version)
               end
             end
-            
+
           end #end_has_many_block
-          
+
           send :include, ActiveRecord::Acts::Versioned::ActsWithAssociationMethods
 
-          self.white_listed_associations.each do |association| 
-            
+          self.white_listed_associations.each do |association|
+
             begin
               klass = association.klass
               unless klass.respond_to?(:create_versioned_table)
-                puts self.name if klass.name == "User"
                 klass.acts_as_versioned
               end
             rescue NameError
             end
-          end          
-          
+          end
+
         end
       end
-      
-      
-      
+
+
+
       module ActsWithAssociationMethods
         def self.included(base) # :nodoc:
-          base.extend ClassMethods          
+          base.extend ClassMethods
         end
-        
-        def autosave_associated_records  
+
+        def autosave_associated_records
           associations = self.class.has_many_versioned_associations
           associations.map(&:name).each do |name|
             associated_records = self.send(name) || []
-            associated_records.each do |associated_record| 
+            associated_records.each do |associated_record|
+
               associated_record.reload
               associated_record.save!
+
             end
           end
         end
-        
-        
-       
+
+
+
       end
-      
+
       module ActMethods
         def self.included(base) # :nodoc:
-          base.extend ClassMethods          
+          base.extend ClassMethods
         end
-        
+
 
         # Saves a version of the model in the versioned table.  This is called in the after_save callback by default
         def save_version
@@ -606,7 +606,7 @@ module ActiveRecord #:nodoc:
         def revert_to!(version)
           revert_to(version) ? save_without_revision : false
         end
-        
+
 
         # Temporarily turns off Optimistic Locking while saving.  Used when reverting so that a new version is not created.
         def save_without_revision
@@ -623,11 +623,11 @@ module ActiveRecord #:nodoc:
             end
           end
         end
-        
+
         def altered?
           track_altered_attributes ? (version_if_changed - changed).length < version_if_changed.length : changed?
         end
-        
+
         # Clones a model.  Used when saving a new version or reverting a model's version.
         def clone_versioned_model(orig_model, new_model)
           self.class.versioned_columns.each do |col|
@@ -645,7 +645,7 @@ module ActiveRecord #:nodoc:
         def save_version?
           version_condition_met? && altered?
         end
-        
+
         # Checks condition set in the :if option to check whether a revision should be created or not.  Override this for
         # custom version condition checking.
         def version_condition_met?
@@ -680,21 +680,21 @@ module ActiveRecord #:nodoc:
         end
 
         def empty_callback() end #:nodoc:
-        
+
         def copy?
           self.copy
         end
-        
+
         def original
           if self.copy?
             self.class.find(self.id)
           end
-        end   
-        
-        def ensure_copy_cannot_be_updated 
+        end
+
+        def ensure_copy_cannot_be_updated
           raise "versions are not editable" if self.copy?
         end
-        
+
         protected
           # sets the new version before saving, unless you're using optimistic locking.  In that case, let it take care of the version.
           def set_new_version
@@ -717,17 +717,17 @@ module ActiveRecord #:nodoc:
           def versioned_class
             const_get versioned_class_name
           end
-          
+
           def columns_that_hold_version_info(tbl_name = self.table_name)
             ActiveRecord::Base.connection.columns(tbl_name).find_all{|c| c.name =~/version/}
           end
 
           def seed_insert_sql
             insert_sql = "DELETE FROM #{self.versioned_table_name}; "
-            insert_sql += "INSERT INTO #{self.versioned_table_name} " 
+            insert_sql += "INSERT INTO #{self.versioned_table_name} "
             insert_sql += "(#{self.columns.reject{|c| c.name=="id"}.map(&:name).join(", ")}, #{self.versioned_foreign_key}) "
             insert_sql += "SELECT #{self.columns.reject{|c| c.name=="id"}.map(&:name).join(", ")},  id "
-            insert_sql += "FROM #{self.table_name};"              
+            insert_sql += "FROM #{self.table_name};"
             insert_sql
           end
 
@@ -749,7 +749,7 @@ module ActiveRecord #:nodoc:
                sql += "INSERT INTO #{jtv} (#{jt_columns}) "
                sql += "SELECT #{jt_columns} FROM #{jt}; "
                ActiveRecord::Base.connection.execute(sql)
-            end           
+            end
           end
 
           def seed_versioned_data
@@ -757,7 +757,7 @@ module ActiveRecord #:nodoc:
             ActiveRecord::Base.connection.execute(self.seed_insert_sql)
             self.seed_habtm_join_tables
           end
-          
+
           # Rake migration task to create the versioned table using options passed to acts_as_versioned
           def create_versioned_table(create_table_options = {})
             puts "Creating tables for #{self.to_s}"
@@ -767,15 +767,15 @@ module ActiveRecord #:nodoc:
                self.connection.add_column table_name, "#{association.name.to_s}_version", :integer
               end
             end
-            
+
             has_and_belongs_to_many_associations = self.reflect_on_all_associations(:has_and_belongs_to_many)
             has_and_belongs_to_many_associations.each do |association|
-              
+
               #add version columns to join table
               unless ActiveRecord::Base.connection.columns(association.options[:join_table]).any?{|c| c.name=="#{self.to_s.underscore}_version"}
                self.connection.add_column association.options[:join_table], "#{self.to_s.underscore}_version", :integer
               end
-              
+
               #create version table for join table if it does not exist
               join_version_table_name = "#{association.options[:join_table]}_versions"
               if connection.table_exists?(join_version_table_name)
@@ -787,16 +787,16 @@ module ActiveRecord #:nodoc:
                 self.connection.create_table(join_version_table_name, {:id => false}) do |t|
                   columns.each do |col|
                     t.column col.name, col.type,
-                      :limit     => col.limit, 
+                      :limit     => col.limit,
                       :default   => col.default,
                       :scale     => col.scale,
                       :precision => col.precision
                   end
                 end
               end
-              
+
             end
-            
+
             # create version column in main table if it does not exist
             if !self.content_columns.find { |c| [version_column.to_s, 'lock_version'].include? c.name }
               self.connection.add_column table_name, version_column, :integer
@@ -804,28 +804,28 @@ module ActiveRecord #:nodoc:
             end
 
             return if connection.table_exists?(versioned_table_name)
-            
+
             self.connection.create_table(versioned_table_name, create_table_options) do |t|
               t.column versioned_foreign_key, :integer
               t.column version_column, :integer
             end
 
-            self.versioned_columns.each do |col| 
-                self.connection.add_column versioned_table_name, col.name, col.type, 
-                  :limit     => col.limit, 
+            self.versioned_columns.each do |col|
+                self.connection.add_column versioned_table_name, col.name, col.type,
+                  :limit     => col.limit,
                   :default   => col.default,
                   :scale     => col.scale,
                   :precision => col.precision
             end
 
             if type_col = self.columns_hash[inheritance_column]
-                self.connection.add_column versioned_table_name, versioned_inheritance_column, type_col.type, 
-                  :limit     => type_col.limit, 
+                self.connection.add_column versioned_table_name, versioned_inheritance_column, type_col.type,
+                  :limit     => type_col.limit,
                   :default   => type_col.default,
                   :scale     => type_col.scale,
                   :precision => type_col.precision
             end
-            
+
             self.connection.add_index versioned_table_name, versioned_foreign_key
           end
 
@@ -841,7 +841,7 @@ module ActiveRecord #:nodoc:
           #   end
           #
           def without_revision(&block)
-            class_eval do 
+            class_eval do
               CALLBACKS.each do |attr_name|
                 alias_method "orig_#{attr_name}".to_sym, attr_name
                 alias_method attr_name, :empty_callback
@@ -849,7 +849,7 @@ module ActiveRecord #:nodoc:
             end
             block.call
           ensure
-            class_eval do 
+            class_eval do
               CALLBACKS.each do |attr_name|
                 alias_method attr_name, "orig_#{attr_name}".to_sym
               end
