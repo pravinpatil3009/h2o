@@ -5,9 +5,10 @@ class Playlist < ActiveRecord::Base
   include StandardModelExtensions::InstanceMethods
   include AncestryExtensions::InstanceMethods
   include AuthUtilities
+  include Authorship
 
   include ActionController::UrlWriter
-    
+
   RATINGS = {
     :remix => 5,
     :bookmark => 1,
@@ -43,7 +44,7 @@ class Playlist < ActiveRecord::Base
     text :description
     text :name
     string :tag_list, :stored => true, :multiple => true
-    string :author 
+    string :author
     integer :karma
 
     boolean :public
@@ -67,7 +68,7 @@ class Playlist < ActiveRecord::Base
       barcode_elements = self.barcode_bookmarked_added
       self.children.each do |child|
         barcode_elements << { :type => "remix",
-                              :date => child.created_at, 
+                              :date => child.created_at,
                               :title => "Remixed to Playlist #{child.name}",
                               :link => playlist_path(child.id) }
       end
@@ -124,7 +125,7 @@ class Playlist < ActiveRecord::Base
   end
 
   def contains_item?(item)
-    actual_objects = self.playlist_items.inject([]) do |arr, pi| 
+    actual_objects = self.playlist_items.inject([]) do |arr, pi|
       arr << pi.resource_item.actual_object if pi.resource_item && pi.resource_item.actual_object;
       arr
     end
