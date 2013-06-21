@@ -1,9 +1,10 @@
 class CollagesController < BaseController
   cache_sweeper :collage_sweeper
-  
+
   before_filter :require_user, :except => [:layers, :index, :show, :description_preview, :embedded_pager, :export, :export_unique, :access_level, :collage_lookup, :heatmap]
   before_filter :load_single_resource, :only => [:layers, :show, :edit, :update, :destroy, :undo_annotation, :copy, :export, :export_unique, :access_level, :heatmap]
   before_filter :store_location, :only => [:index, :show]
+  before_filter :set_flash_for_outdated_collage, :only => [:show]
 
   protect_from_forgery :except => [:copy, :export_unique]
   before_filter :restrict_if_private, :only => [:layers, :show, :edit, :update, :destroy, :undo_annotation, :copy, :export, :export_unique, :access_level, :heatmap]
@@ -30,7 +31,7 @@ class CollagesController < BaseController
     render :text => Collage.format_content(params[:preview]), :layout => false
   end
 
-  def access_level 
+  def access_level
     session[:return_to] = "/collages/#{params[:id]}"
 
     if current_user
@@ -85,7 +86,7 @@ class CollagesController < BaseController
 
   # GET /collages/1
   def show
-    @page_cache = true
+    @page_cache = false
     add_javascripts ['collages', 'markitup/jquery.markitup.js','markitup/sets/textile/set.js','markitup/sets/html/set.js', 'jquery.xcolor']
     add_stylesheets ['/javascripts/markitup/skins/markitup/style.css','/javascripts/markitup/sets/textile/style.css', 'collages']
 
@@ -165,5 +166,24 @@ class CollagesController < BaseController
 
   def collage_lookup
     render :json => { :items => @current_user.collages.collect { |p| { :display => p.name, :id => p.id } } }
+  end
+
+  def set_flash_for_outdated_collage
+    flash[:notice] = outdated_collage_text if @collage.outdated?
+  end
+
+  def outdated_collage_text
+    notice = "The source case of this collage was updated and the text below outdated, "
+    if @collage.updated_collage_exists?
+      notice += @template.link_to("a new collage created from the updated case is here.", collage_path(@collage.annotatable.current_collage))
+    else
+      notice += " a new collage based on the updated case does not yet exist, "
+      notice += @template.link_to("click here to create it.",
+                                  new_collage_path(:annotatable_type => 'Case',
+                                                   :annotatable_id => @collage.annotatable.id),
+                                                   :class => 'collage-this new-action')
+    end
+    notice = notice.html_safe
+    notice
   end
 end

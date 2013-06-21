@@ -120,6 +120,11 @@ class Case < ActiveRecord::Base
     self.collages.detect{|collage| collage.current?}
   end
 
+  def current_collage?
+    self.current_collage
+  end
+
+
   def barcode
     Rails.cache.fetch("case-barcode-#{self.id}") do
       barcode_elements = self.barcode_bookmarked_added
