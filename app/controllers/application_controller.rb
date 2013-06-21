@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
   rescue_from Acl9::AccessDenied, :with => :deny_access
 
   helper :all
-  helper_method :current_user_session, :current_user
+  helper_method :current_user_session, :current_user, :current_user?
   filter_parameter_logging :password, :password_confirmation
 
   layout :layout_switch
@@ -262,6 +262,10 @@ class ApplicationController < ActionController::Base
     def current_user_session
       return @current_user_session if defined?(@current_user_session)
       @current_user_session = UserSession.find
+    end
+
+    def current_user?
+      current_user
     end
 
     def current_user
