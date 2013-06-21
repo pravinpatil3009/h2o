@@ -236,6 +236,10 @@ class Collage < ActiveRecord::Base
     !self.outdated?
   end
 
+  def updated_collage_exists?
+    self.annotatable.current_collage?
+  end
+
   def outdated?
     self.annotatable.version > self.annotatable_version
   end
