@@ -1,0 +1,8 @@
+<div class="stats_panel">
+  <p><ol>
+    <% @case.top_ancestors.each do |collage| -%>
+      <li><%= link_to collage.name, collage_path(collage) %></li>
+      <% end %>
+      <ol>
+  </p>
+</div>
