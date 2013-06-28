@@ -22,6 +22,10 @@
         <%= link_to raw('<span class="icon icon-edit"></span>EDIT CASE INFORMATION<span class="icon icon-arrow"></span>'), edit_case_path(@case), :class => "edit-external scale0-8 requires_edit" %>
     </div>
   <% end %>
+  <div id="description" class="scale1-1">
+    <%= link_to raw('<span class="icon icon-edit"></span>EDIT CASE INFORMATION<span class="icon icon-arrow"></span>'), edit_case_path(@case), :class => "edit-external scale0-8" %>
+  </div>
+  <% end -%>
   <article>
     <%= raw @case.content %>
   </article>
