@@ -26,7 +26,8 @@ class ApplicationController < ActionController::Base
   before_filter :set_sort_lists, :only => :index
   before_filter :set_default_font_size
   before_filter :set_page_cache_indicator
- 
+  before_filter :reload_versioned_objects
+
   #Add ability to make page caching conditional
   #to support only caching public items
   def self.caches_page(*actions)
@@ -40,10 +41,10 @@ class ApplicationController < ActionController::Base
     if current_user && ! current_user.tz_name.blank?
       Time.zone = current_user.tz_name
     else
-      Time.zone = DEFAULT_TIMEZONE 
+      Time.zone = DEFAULT_TIMEZONE
     end
   end
-  
+
   def set_default_font_size
     large_font_size = 16
     cookies[:font_size] = large_font_size if cookies[:font_size].blank?
@@ -52,7 +53,7 @@ class ApplicationController < ActionController::Base
   def set_page_cache_indicator
     @page_cache = false
   end
-  
+
   # Switches to nil layout for ajax calls.
   def layout_switch
     (request.xhr?) ? nil : :application
@@ -80,7 +81,7 @@ class ApplicationController < ActionController::Base
   def deny_access
     flash[:notice] = "You do not have access to this content."
     #redirect_to playlists_path
-    
+
     redirect_back_or_default "/"
   end
 
@@ -134,7 +135,7 @@ class ApplicationController < ActionController::Base
       }))
     end
   end
- 
+
   def common_index(model)
     set_belongings model
 
@@ -166,7 +167,7 @@ class ApplicationController < ActionController::Base
 
   def build_search(model, params)
     items = (model == TextBlock ? Sunspot.new_search(TextBlock, JournalArticle) : Sunspot.new_search(model))
-    
+
     items.build do
       if params.has_key?(:keywords)
         keywords params[:keywords]
@@ -245,21 +246,21 @@ class ApplicationController < ActionController::Base
     @stylesheets = [] if ! defined?(@stylesheets)
     @stylesheets << new_stylesheets
   end
-  
+
   # Accepts a string or an array and emits javascript tags in the layout in that order.
   def add_javascripts(new_javascripts)
     @javascripts = [] if ! defined?(@javascripts)
     @javascripts << new_javascripts
   end
-                           
+
   def apply_user_preferences!(user)
     if user
       cookies[:font_size] = user.default_font_size
-      cookies[:use_new_tab] = (user.tab_open_new_items? ? 'true' : 'false') 
-      cookies[:show_annotations] = (user.default_show_annotations? ? 'true' : 'false') 
+      cookies[:use_new_tab] = (user.tab_open_new_items? ? 'true' : 'false')
+      cookies[:show_annotations] = (user.default_show_annotations? ? 'true' : 'false')
     end
   end
-  
+
   private
 
     def current_user_session
@@ -334,5 +335,10 @@ class ApplicationController < ActionController::Base
       else
         return true
       end
+    end
+
+    def reload_versioned_objects
+      Case.new
+      Collage.new
     end
 end
