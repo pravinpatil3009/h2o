@@ -121,6 +121,11 @@ class CaseTest < ActiveSupport::TestCase
     new_case = Case.copy_by_id_and_version(@case.id, 1)
 
     assert_equal 2, new_case.collages.count
+    @case.short_name = "bada bing"
+    @case.save!
+    new_case = Case.copy_by_id_and_version(@case.id, 2)
+    assert_equal 2, new_case.collages.count
+
 
   end
 

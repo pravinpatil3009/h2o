@@ -8,8 +8,8 @@ module AnnotatableExtensions
         self.collages.length == 0
       end
       def content_editable?
-        # Only allow the content to be edited if there haven't been any collages created from this instance.
-        self.collages.length == 0
+        # Cases are always editable because collages are versioned
+        true
       end
     end
 

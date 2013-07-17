@@ -78,6 +78,7 @@ class Case < ActiveRecord::Base
   end
 
   after_create :assign_to_h2ocases
+  after_update :mark_collages_as_updated
 
   alias :to_s :display_name
 
@@ -92,6 +93,7 @@ class Case < ActiveRecord::Base
   def approve!
     self.update_attribute('active', true)
   end
+
   def can_edit?
     return self.owner? || self.admin? || current_user.has_role?(:case_admin) || current_user.has_role?(:superadmin)
   end
@@ -111,8 +113,8 @@ class Case < ActiveRecord::Base
   def self.to_tsv(options = {})
     res = ''
     Case.newly_added.each do |case_obj|
-      FasterCSV.generate(res, :col_sep => "\t") do |csv| 
-        csv << [case_obj.short_name, 
+      FasterCSV.generate(res, :col_sep => "\t") do |csv|
+        csv << [case_obj.short_name,
                 case_obj.case_citations.first.to_s,
                 "http://h2odev.law.harvard.edu/cases/#{case_obj.id}"
                 ]
@@ -150,6 +152,12 @@ class Case < ActiveRecord::Base
       self.update_attribute(:karma, value)
 
       barcode_elements.sort_by { |a| a[:date] }
+    end
+  end
+
+  def mark_collages_as_outdated
+    self.collages.each do |c|
+      c.update_attribute('outdated', true)
     end
   end
 

@@ -173,12 +173,12 @@ class CollagesController < BaseController
   end
 
   def outdated_collage_text
-    notice = "The source case of this collage was updated and the text below outdated, "
+    notice = "The source case of this collage recently changed and the text below is outdated. "
+    link_text = "Click here to create a new collage based on the lastest changes to this case (You'll be taken to a form to set the name and description of the new collage)"
     if @collage.updated_collage_exists?
-      notice += @template.link_to("a new collage created from the updated case is here.", collage_path(@collage.annotatable.current_collage))
+      notice += @template.link_to(link_text, collage_path(@collage.annotatable.current_collage))
     else
-      notice += " a new collage based on the updated case does not yet exist, "
-      notice += @template.link_to("click here to create it.",
+      notice += @template.link_to(link_text,
                                   new_collage_path(:annotatable_type => 'Case',
                                                    :annotatable_id => @collage.annotatable.id),
                                                    :class => 'collage-this new-action')

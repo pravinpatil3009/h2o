@@ -1,7 +1,11 @@
 <div class="stats_panel">
   <p><ol>
-    <% @case.top_ancestors.each do |collage| -%>
-      <li><%= link_to collage.name, collage_path(collage) %></li>
+    <% @case.collages.each do |collage| -%>
+      <% if collage.copy? %>
+        <li><%= link_to "#{collage.name} (Version #{collage.version})", collage_version_path(collage, collage.version) %></li>
+      <% else %>
+        <li><%= link_to collage.name, collage_path(collage) %></li>
+      <% end %>
       <% end %>
       <ol>
   </p>
