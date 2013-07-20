@@ -169,6 +169,7 @@ module ActiveRecord #:nodoc:
         REJECTED_ASSOCIATIONS = [:versions, :tag, :layer_taggings, :taggables, :taggings, :tagging, :taggable, :tags,
                                  :tag_taggings, :base_tags, :playlist, :playlists, :playlist_item, :playlist_items,
                                  :users, :user, :roles_users, :role, :roles, :accepted_roles, :user_collections, :defects]
+        REJECTED_TRIGGER_FIELDS = [:karma]
         def acts_as_versioned(options = {}, &extension)
 
 
@@ -226,7 +227,7 @@ module ActiveRecord #:nodoc:
 
           cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
             :version_column, :max_version_limit, :track_altered_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
-            :version_association_options, :version_if_changed
+            :version_association_options, :version_if_changed, :excluded_trigger_fields
 
           self.versioned_class_name         = options[:class_name]  || "Version"
           self.versioned_foreign_key        = options[:foreign_key] || self.to_s.foreign_key
@@ -237,6 +238,7 @@ module ActiveRecord #:nodoc:
           self.max_version_limit            = options[:limit].to_i
           self.version_condition            = options[:if] || true
           self.non_versioned_columns        = [self.primary_key, inheritance_column, self.version_column, 'lock_version', versioned_inheritance_column] + options[:non_versioned_columns].to_a.map(&:to_s)
+          self.excluded_trigger_fields      = (options[:excluded_trigger_fields] || []) + REJECTED_TRIGGER_FIELDS
           self.version_association_options  = {
                                                 :class_name  => "#{self.to_s}::#{versioned_class_name}",
                                                 :foreign_key => versioned_foreign_key,
@@ -624,8 +626,16 @@ module ActiveRecord #:nodoc:
           end
         end
 
+        def excluded_fields
+          REJECTED_TRIGGER_FIELDS
+        end
+
+        def any_non_excluded_fields_changed?
+          (changes.keys - self.class.excluded_trigger_fields.map{|field| field.to_s}).any?
+        end
+
         def altered?
-          track_altered_attributes ? (version_if_changed - changed).length < version_if_changed.length : changed?
+          track_altered_attributes ? (version_if_changed - changed).length < version_if_changed.length : any_non_excluded_fields_changed?
         end
 
         # Clones a model.  Used when saving a new version or reverting a model's version.

@@ -14,6 +14,7 @@ class Annotation < ActiveRecord::Base
 
   before_create :create_annotation_caches
   before_save :create_annotation_word_count_cache
+  before_create :increment_collage_version
 
   belongs_to :collage
 
@@ -83,4 +84,7 @@ class Annotation < ActiveRecord::Base
     end
   end
 
+  def increment_collage_version
+    self.collage.update_attribute(:version, self.collage.version + 1) if self.new_record?
+  end
 end

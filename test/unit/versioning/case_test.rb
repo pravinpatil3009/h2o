@@ -94,7 +94,7 @@ class CaseTest < ActiveSupport::TestCase
   def test_annotatable_version_is_being_set
     setup_collage
     @case.collages << @collage
-    assert_equal 1, @collage.annotatable_version
+    assert_equal 2, @collage.annotatable_version
   end
 
   def test_collages_still_returns_original_collage
@@ -118,12 +118,12 @@ class CaseTest < ActiveSupport::TestCase
     setup_collage('second', 'second')
     @case.collages << @collage
     @case.save!
-    new_case = Case.copy_by_id_and_version(@case.id, 1)
+    new_case = Case.copy_by_id_and_version(@case.id, 2)
 
     assert_equal 2, new_case.collages.count
     @case.short_name = "bada bing"
     @case.save!
-    new_case = Case.copy_by_id_and_version(@case.id, 2)
+    new_case = Case.copy_by_id_and_version(@case.id, 3)
     assert_equal 2, new_case.collages.count
 
 
@@ -138,23 +138,23 @@ class CaseTest < ActiveSupport::TestCase
     @case.collages << @collage
     @case.short_name = "bada bing"
 
-    assert_equal 1, @case.collages.first.annotatable_version
-    assert_equal 1, @case.collages.last.annotatable_version
+    assert_equal 2, @case.collages.first.annotatable_version
+    assert_equal 3, @case.collages.last.annotatable_version
 
     @case.save!
-    assert_equal 2, @case.version
+    assert_equal 4, @case.version
     collage_one = @case.collages.first
     collage_two = @case.collages.last
-    assert_equal 2, collage_one.annotatable_version
-    assert_equal 2, collage_two.annotatable_version
+    assert_equal 4, collage_one.annotatable_version
+    assert_equal 4, collage_two.annotatable_version
     collage_one.update_attribute('content', "foo bar")
     collage_two.update_attribute('content', 'yadda yadda yadda')
     @case.short_name = "New Name Now"
     @case.save!
-    assert_equal 3, collage_one.annotatable_version
-    assert_equal 3, collage_one.versions.last.annotatable_version
-    assert_equal 3, collage_two.annotatable_version
-    new_case = Case.copy_by_id_and_version(@case.id, 1)
+    assert_equal 5, collage_one.annotatable_version
+    assert_equal 5, collage_one.versions.last.annotatable_version
+    assert_equal 5, collage_two.annotatable_version
+    new_case = Case.copy_by_id_and_version(@case.id, 2)
     assert_equal  2, new_case.collages.count
     assert_equal 'first', new_case.collages.first.content
   end
@@ -251,6 +251,11 @@ class CaseTest < ActiveSupport::TestCase
     assert_respond_to Case, :seed_update_sql
   end
 
+  def test_case_update_of_karma_does_not_increment_version
+    @case.karma = 5
+    assert !@case.altered?
+  end
+
   def test_seed_update_sql
     assert_equal 'UPDATE cases SET case_jurisdiction_version=1, case_request_version=1, version=1;', Case.seed_update_sql
   end
@@ -263,4 +268,6 @@ class CaseTest < ActiveSupport::TestCase
     u.save false
 
   end
+
+
 end

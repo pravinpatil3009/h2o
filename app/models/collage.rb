@@ -60,6 +60,8 @@ class Collage < ActiveRecord::Base
   # we're doing a heavy bit of parsing on each attempted save. It is probably better than allowing
   # the creation of a contentless collage, though.
   before_validation_on_create :prepare_content
+  before_create :increment_case_version
+
 
   validates_presence_of :annotatable_type, :annotatable_id
   validates_length_of :description, :in => 1..(5.kilobytes), :allow_blank => true
@@ -275,5 +277,9 @@ class Collage < ActiveRecord::Base
       self.indexable_content = indexable_content.join(' ')
       self.content = doc.xpath("//html/body/*").to_s
     end
+  end
+
+  def increment_case_version
+    self.annotatable.update_attribute(:version, self.annotatable.version + 1) if self.new_record?
   end
 end

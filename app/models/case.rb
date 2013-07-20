@@ -78,7 +78,7 @@ class Case < ActiveRecord::Base
   end
 
   after_create :assign_to_h2ocases
-  after_update :mark_collages_as_updated
+  after_update :mark_collages_as_outdated
 
   alias :to_s :display_name
 

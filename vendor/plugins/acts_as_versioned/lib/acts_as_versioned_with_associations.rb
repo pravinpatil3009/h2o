@@ -8,7 +8,7 @@ module ActiveRecord #:nodoc:
 
       module ClassMethods
 
-        def acts_as_versioned_with_associations
+        def acts_as_versioned_with_associations(options = {})
 
 
           def self.has_many_associations
@@ -39,7 +39,7 @@ module ActiveRecord #:nodoc:
             self.versioned_associations(:belongs_to)
           end
 
-          self.acts_as_versioned
+          self.acts_as_versioned(options)
 
           self.belongs_to_versioned_associations.each do |association|
             begin

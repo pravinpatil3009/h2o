@@ -22,17 +22,14 @@ class CollageTest < ActiveSupport::TestCase
     assert_equal 1, @collage.annotatable_version
   end
 
-
   def test_saving_case_should_update_the_collage_annotatable_version
     @case.collages << @collage
     @case.content = "second content"
     @case.save!
-    assert_equal 2, @case.version
+    @case.reload
+    assert_equal 3, @case.version
     @collage.reload
-    assert_equal 2, @collage.annotatable_version
-    #@case.content = "third content"
-    #@case.save!
-    #assert_equal 3, @collage.annotatable_version
+    assert_equal 3, @collage.annotatable_version
   end
 
   def test_collage_added_to_case_without_explicit_save
@@ -44,9 +41,10 @@ class CollageTest < ActiveSupport::TestCase
 
   def test_can_get_most_recent_edit_when_there_are_multiple_edits
     @case.collages << @collage
+    @case.reload
     assert_equal 1, @case.collages.count
-    assert_equal 1, @case.version
-    assert_equal 1, @case.collages.first.annotatable_version
+    assert_equal 2, @case.version
+    assert_equal 2, @case.collages.first.annotatable_version
     @collage.content = "collage second content"
     @collage.save!
 
@@ -55,15 +53,16 @@ class CollageTest < ActiveSupport::TestCase
 
     @case.content = "second_content"
     @case.save!
-    assert_equal "collage third content", @collage.versions.find(:last, :conditions => ['annotatable_version = ?', 1]).content
+    assert_equal "collage third content", @collage.versions.find(:last, :conditions => ['annotatable_version = ?', 2]).content
   end
 
   def test_collage_with_multiple_saves
     assert_equal 1, @collage.version
     @case.collages << @collage
+    @case.reload
     assert_equal 1, @case.collages.count
-    assert_equal 1, @case.version
-    assert_equal 1, @case.collages.first.annotatable_version
+    assert_equal 2, @case.version
+    assert_equal 2, @case.collages.first.annotatable_version
     @collage.content = "collage second content"
     @collage.save!
 
@@ -76,6 +75,19 @@ class CollageTest < ActiveSupport::TestCase
     new_case = Case.copy_by_id_and_version(@case.id, 1)
     assert_equal new_case.content, collage.annotatable.content
 
+  end
+
+  def test_create_collage_increments_case_version
+    assert_equal 1, @case.version
+    collage = Collage.new(:name => "new collage",
+                          :content => 'new content',
+                          :annotatable_id => @case.id,
+                          :annotatable_type => 'Case')
+
+    collage.save
+    assert_equal 1, @collage.annotatable_version
+    @case.reload
+    assert_equal 3, @case.version
   end
 
 end

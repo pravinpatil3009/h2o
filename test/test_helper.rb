@@ -58,22 +58,22 @@ class ActiveSupport::TestCase
     @case_jurisdiction.save!
   end
 
-  def setup_annotation
-    @annotation = Annotation.new
-    @annotation.collage = @collage
-    @annotation.annotated_content = "first content"
-    @annotation.annotation = "content"
-    @annotation.annotation_start = "T1"
-    @annotation.annotation_end = "T100"
-    @annotation.content = "first content"
-    @annotation.save!
+  def setup_annotation(options = {})
+    annotation = Annotation.new
+    annotation.collage = options[:collage] || @collage
+    annotation.annotated_content = options[:annotated_content] || "first content"
+    annotation.annotation = options[:content] || "content"
+    annotation.annotation_start = options[:annotation_start] || "T1"
+    annotation.annotation_end = options[:annotation_end] || "T100"
+    annotation.save!
+    @annotation = annotation
+    annotation
   end
 
   def setup_collage_link(host_collage = nil, linked_collage = nil)
     @collage_link = CollageLink.new
     @collage_link.link_text_start = "T1"
     @collage_link.link_text_end = "T2"
-    @collage_link.content = "collage link content"
     @collage_link.host_collage = host_collage if host_collage
     @collage_link.linked_collage = linked_collage if linked_collage
     @collage_link.save!
