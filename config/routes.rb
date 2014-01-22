@@ -82,6 +82,8 @@ ActionController::Routing::Routes.draw do |map|
   map.resource :user_session, :collection => {:crossroad => [:get,:post]}
   # map.resource :dropbox_session, :collection => {:create => [:get, :post]}
   map.connect '/dropbox_session', :controller => :dropbox_sessions, :action => :create
+  map.connect '/canvas_auth', :controller => :canvas_auth, :action => :authorize
+  map.connect '/lti_config.:format', :controller => :canvas_auth, :action => :lti_config
   map.resources :password_resets
   map.resources :login_notifiers
   map.log_out "/log_out", :controller => :user_sessions, :action => :destroy
