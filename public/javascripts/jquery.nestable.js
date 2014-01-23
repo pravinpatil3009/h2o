@@ -93,9 +93,9 @@
             {
                 var handle = $(e.target);
 
-                //STEPH: Overrides to allow links inside handle to be preserved
+                //H2O Customization
                 if(handle.is('a') || handle.is('.icon-delete') || handle.is('.icon-edit')) {
-                  return;
+                    return;
                 }
 
                 if (!handle.hasClass(list.options.handleClass)) {
@@ -295,16 +295,18 @@
             // fix for zepto.js
             //this.placeEl.replaceWith(this.dragEl.children(this.options.itemNodeName + ':first').detach());
             var el = this.dragEl.children(this.options.itemNodeName).first();
+            return;
+            console.log(el[0]);
             el[0].parentNode.removeChild(el[0]);
             this.placeEl.replaceWith(el);
 
             this.dragEl.remove();
-            //STEPH: Overrides here to force custom_change, not change
-            this.el.trigger('custom_change');
-            if (this.hasNewRoot) {
-                //this.dragRootEl.trigger('change');
-                this.dragRootEl.trigger('custom_change');
-            }
+
+            //H2O Customization
+            //this.el.trigger('custom_change');
+            //if (this.hasNewRoot) {
+            //}
+            this.dragRootEl.trigger('custom_change');
             this.reset();
         },
 
@@ -371,9 +373,24 @@
                 if (mouse.distX > 0 && prev.length && !prev.hasClass(opt.collapsedClass)) {
                     // cannot increase level when item above is collapsed
                     list = prev.find(opt.listNodeName).last();
-                    //Overrides here to not allow horizontal movement
-                    list = prev.children(opt.listNodeName).last();
-                    list.append(this.placeEl);
+
+                    // check if depth limit has reached
+                    depth = this.placeEl.parents(opt.listNodeName).length;
+
+                    if (depth + this.dragDepth <= opt.maxDepth) {
+                        // create new sub-level if one doesn't exist
+                        //H2O Customization: check if data.nestable
+                        if (prev.data('nestable') && !list.length) {
+                            list = $('<' + opt.listNodeName + '/>').addClass(opt.listClass);
+                            list.append(this.placeEl);
+                            prev.append(list);
+                            this.setParent(prev);
+                        } else {
+                            // else append to next level up
+                            list = prev.children(opt.listNodeName).last();
+                            list.append(this.placeEl);
+                        }
+                    }
                 }
                 // decrease horizontal level
                 if (mouse.distX < 0) {
@@ -448,8 +465,8 @@
                 }
                 // parent root list has changed
                 if (isNewRoot) {
-                    this.hasNewRoot = true;
                     this.dragRootEl = pointElRoot;
+                    this.hasNewRoot = this.el[0] !== this.dragRootEl[0];
                 }
             }
         }

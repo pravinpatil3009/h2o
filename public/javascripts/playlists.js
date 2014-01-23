@@ -469,27 +469,32 @@ $.extend({
       $('.dd-handle-inactive').removeClass('dd-handle-inactive').addClass('dd-handle');
       $('div.playlists').nestable({ group: 1 });
       $('div.playlists').on('custom_change', function() {
+        var working_playlist = $(this);
+        working_playlist.addClass('current_working_list');
+        if(working_playlist.find('div.current_working_list').size() > 0) {
+          return;
+        }
         if(dropped_item !== undefined) {
           $.cancelItemAdd();
         }
 
         var position_update = true; 
         var new_item;
-        var order = $('div.playlists').nestable('serialize');
+        var order = working_playlist.nestable('serialize');
         var positions = new Array();
         $.each(order, function(i, item) {
           if(item.drop == "new_item") {
             position_update = false;
             new_item = item;
           } else {
-            positions.push("playlist_item[]=" + item.id);
+            positions.push("playlist_item[]=" + item.itemid);
           }
         });
         if(position_update) {
           $.ajax({
             type: 'post',
             dataType: 'json',
-            url: '/playlists/' + $('#playlist').data('itemid') + '/position_update',
+            url: '/playlists/' + working_playlist.data('playlist_id') + '/position_update',
             data: {
               playlist_order: positions.join('&')
             },
@@ -521,8 +526,8 @@ $.extend({
               klass: new_item.type,
               id: new_item.id,
 			        url: url,
-			        playlist_id: playlist_id,
-              position: $('.playlists ol.dd-list .dd-item').index(listing_el) + 1
+			        playlist_id: working_playlist.data('playlist_id'),
+              position: working_playlist.find('.dd-list > .dd-item').index(listing_el) + 1 
 			      },
 			      success: function(html){
 			        $.hideGlobalSpinnerNode();
@@ -577,7 +582,7 @@ $.extend({
           $.hideGlobalSpinnerNode();
           $('#add_item_results').html(html);
           $.toggleHeaderPagination();
-          $('div#nestable2').nestable({ group: 1, maxDepth: 1 });
+          $('div#nestable2').nestable({ group: 1 }); //, maxDepth: 1 });
           $.initializeBarcodes();
           $('#add_item_results .sort select').selectbox({
             className: "jsb", replaceInvisible: true 
@@ -605,7 +610,7 @@ $.extend({
           $.hideGlobalSpinnerNode();
           $('#add_item_results').html(html);
           $.toggleHeaderPagination();
-          $('div#nestable2').nestable({ group: 1, maxDepth: 1 });
+          $('div#nestable2').nestable({ group: 1 }); //, maxDepth: 1 });
           $('#add_item_results .sort select').selectbox({
             className: "jsb", replaceInvisible: true 
           }).change(function() {

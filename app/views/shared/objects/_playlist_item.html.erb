@@ -1,6 +1,6 @@
-<li class="<%= "dd-item" if recursive_level == 0 %> playlist listitem level<%= recursive_level %> listitem<%= item.id %> <%= 'last' if last %>" id="playlist_item_<%= item.id %>" data-id="<%= item.id %>" data-itemid="<%= item.id %>" data-user_id="<%= actual_object.present? ? actual_object.user_id : 'n/a' %>">
+<li class="dd-item playlist listitem level<%= recursive_level %> listitem<%= item.id %> <%= 'last' if last %>" id="playlist_item_<%= item.id %>" data-itemid="<%= item.id %>" data-user_id="<%= actual_object.present? ? actual_object.user_id : 'n/a' %>" data-nestable="<%= item.actual_object_type == "Playlist" %>">
   <div class="wrapper <%= "missing_item" if actual_object.nil? %>">
-  <div class="inner-wrapper <%= "dd-handle" if recursive_level == 0 %>">
+  <div class="inner-wrapper dd-handle">
     <table><tr>
       <td class="width_<%= (recursive_level + 1)*11 %> number"><%= parent_index == '' ? "#{index}" : "#{parent_index}.#{index}" %></td>
       <td class="icon-cell">
@@ -64,8 +64,9 @@
   </div>
   </div>
     <% if recursive_level < 4 && item.actual_object_type == 'Playlist' && actual_object -%>
-    <section class="playlists">
-      <ol>
+    <div class="playlists dd" data-playlist_id="<%= actual_object.id %>">
+      <% if actual_object.playlist_items.any? -%>
+      <ol class="dd-list">
         <% actual_object.playlist_items.each_with_index do |nested_item, nested_index| -%>
           <%= render :partial => 'shared/objects/playlist_item',
             :locals => { :item => nested_item,
@@ -76,6 +77,7 @@
             :last => (nested_item == actual_object.playlist_items.last) } %>
         <% end -%>
       </ol>
-    </section>
+      <% end -%>
+    </div>
     <% end -%>
  </li>
