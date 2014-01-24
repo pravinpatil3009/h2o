@@ -1,6 +1,7 @@
 class UserSessionsController < ApplicationController
   before_filter :require_no_user, :only => [:new, :create]
   before_filter :require_user, :only => :destroy
+  before_filter :display_first_time_canvas_notice, :only => [:new]
   protect_from_forgery :except => [:create]
 
   def new
@@ -13,7 +14,10 @@ class UserSessionsController < ApplicationController
     @user_session.save do |result|
       if result
         apply_user_preferences(@user_session.user)
-        save_canvas_id_to_current_user if first_time_canvas_login?
+        if first_time_canvas_login?
+          save_canvas_id_to_user(@user_session.user)
+          flash[:notice] = "You canvas id was attached to this account"
+        end
         if request.xhr?
           #Text doesn't matter, status code does.
           render :text => 'Success!', :layout => false
@@ -31,19 +35,5 @@ class UserSessionsController < ApplicationController
     current_user_session.destroy
     redirect_back_or_default "/"
   end
-
-  def first_time_canvas_login?
-    session.key?(:canvas_user_id)
-  end
-
-  def save_canvas_id_to_current_user
-    @user_session.user.update_attribute(:canvas_id, session.fetch(:canvas_user_id))
-    clear_canvas_id_from_session
-  end
-
-  def clear_canvas_id_from_session
-    session[:canvas_user_id] = nil
-  end
-
 
 end

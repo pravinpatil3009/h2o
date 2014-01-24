@@ -9,7 +9,6 @@ class CanvasAuthController < ApplicationController
     #login_user
     #redirect_to_dashboard
     #else
-    set_flash_message
     set_session_with_canvas_user_id
     redirect_to_h2o_login
     #end
@@ -28,14 +27,6 @@ class CanvasAuthController < ApplicationController
 
   def redirect_to_h2o_login
     redirect_to new_user_session_path
-  end
-
-  def set_flash_message
-    flash[:notice] =
-    "You are logging in to H2o directly from Canvas for the first time.<br/><br/>
-     After you login your Canvas id will be attached to your H2o id
-     and the next time you initiate an H2o session from Canvas you'll be logged in
-     automatically.".html_safe
   end
 
   def lti_config
