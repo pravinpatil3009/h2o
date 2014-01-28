@@ -9,6 +9,9 @@ var heatmap_display = false;
 //var last_data;
 
 $.extend({
+  clean_layer: function(layer_name) {
+    return layer_name.replace(/\./, 'specialsymbol');
+  },
   rehighlight: function() {
     //do nothing
   },
