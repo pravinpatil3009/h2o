@@ -10,9 +10,9 @@ class AutoMigrateCollages < ActiveRecord::Migration
       end
     end
 
-    # SET readable state to all updated to ''
-    # RESET word count on all
-    # DELETE ALL COLLAGE LINKS
+    execute "UPDATE collages SET readable_state = ''"
+    execute "UPDATE collages SET words_shown = word_count"
+    # Later TODO: DELETE ALL COLLAGE LINKS, Remove CollageLink model, Remove tt columns from collages
   end
 
   def self.down
