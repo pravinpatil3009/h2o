@@ -291,4 +291,12 @@ class UsersController < ApplicationController
   def playlists
     render :json => { :playlists => User.find(params[:id]).playlists.select { |p| p.name != 'Your Bookmarks' }.to_json(:only => [:id, :name]) }
   end
+
+  def disconnect_canvas
+    @user = @current_user
+    @user.update_attribute(:canvas_id, nil)
+    flash[:notice] = 'Canvas connection removed'
+    redirect_to edit_user_path(@user)
+  end
+
 end
