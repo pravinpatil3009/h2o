@@ -23,12 +23,10 @@
         <% else -%>
         <%= item.name %> <span class="missing_item">[This resource no longer exists on H2O because its owner deleted it.]</span>
         <% end -%>
-        <% if recursive_level == 0 %>
         <%= link_to raw('<span class="icon icon-delete"></span>'), url_for(:controller => 'playlist_items', :action => 'destroy', :id => item),
           :class => "action delete-playlist-item requires_remove" %>
         <%= link_to raw('<span class="icon icon-edit"></span>'), url_for(:controller => 'playlist_items', :action => 'edit', :id => item), 
           :class => "action edit-playlist-item requires_edit" %>
-        <% end -%>
       </td>
     </tr></table>
     <% if item.render_dropdown -%>
@@ -64,9 +62,8 @@
   </div>
   </div>
     <% if recursive_level < 4 && item.actual_object_type == 'Playlist' && actual_object -%>
-    <div class="playlists dd" data-playlist_id="<%= actual_object.id %>">
       <% if actual_object.playlist_items.any? -%>
-      <ol class="dd-list">
+      <div class="dd" data-playlist_id="<%= actual_object.id %>"><ol class="dd-list">
         <% actual_object.playlist_items.each_with_index do |nested_item, nested_index| -%>
           <%= render :partial => 'shared/objects/playlist_item',
             :locals => { :item => nested_item,
@@ -76,8 +73,7 @@
             :recursive_level => recursive_level + 1,
             :last => (nested_item == actual_object.playlist_items.last) } %>
         <% end -%>
-      </ol>
+      </ol></div>
       <% end -%>
-    </div>
     <% end -%>
  </li>

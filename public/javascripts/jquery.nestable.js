@@ -295,18 +295,22 @@
             // fix for zepto.js
             //this.placeEl.replaceWith(this.dragEl.children(this.options.itemNodeName + ':first').detach());
             var el = this.dragEl.children(this.options.itemNodeName).first();
-            return;
-            console.log(el[0]);
+            
+            //H2O Customization
+            var playlist_changed = this.placeEl.parents('.dd-item:first');
+
             el[0].parentNode.removeChild(el[0]);
             this.placeEl.replaceWith(el);
-
             this.dragEl.remove();
 
-            //H2O Customization
-            //this.el.trigger('custom_change');
-            //if (this.hasNewRoot) {
-            //}
-            this.dragRootEl.trigger('custom_change');
+console.log('playlist changed');
+console.log(playlist_changed);
+            if(playlist_changed.size() > 0) {
+              $.dropNested(playlist_changed);
+            } else {
+              $.dropSingle();
+            }
+
             this.reset();
         },
 
@@ -377,11 +381,16 @@
                     // check if depth limit has reached
                     depth = this.placeEl.parents(opt.listNodeName).length;
 
+console.log(this.placeEl);
+console.log(prev);
+console.log('parent is');
+console.log(this.placeEl.parent());
                     if (depth + this.dragDepth <= opt.maxDepth) {
                         // create new sub-level if one doesn't exist
                         //H2O Customization: check if data.nestable
                         if (prev.data('nestable') && !list.length) {
                             list = $('<' + opt.listNodeName + '/>').addClass(opt.listClass);
+                            console.log(list);
                             list.append(this.placeEl);
                             prev.append(list);
                             this.setParent(prev);
