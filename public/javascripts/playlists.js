@@ -21,9 +21,23 @@ $.extend({
       $('a.private').removeClass('private');
     }
   },
+  set_nestability_and_editability: function() {
+    if(access_results.is_superadmin && false) {
+      $('li.playlist').data('nestable', true);
+    } else if($.cookie('user_id') != null) {
+      var editable_playlists = $('li.playlist[data-user_id=' + $.cookie('user_id') + ']');
+      editable_playlists.data('nestable', true);
+
+      //TODO: Make editable_playlists nestable
+      var editable_items = editable_playlists.find('> .dd > .dd-list > li.listitem');
+      var items_to_revoke =  $('li.playlist').not(editable_playlists).not(editable_items);
+      items_to_revoke.find('.delete-playlist-item,.edit-playlist-item').remove();
+    }
+  },
   playlist_afterload: function(results) {
+    $.set_nestability_and_editability();
     if(results.can_edit || results.can_edit_notes || results.can_edit_desc) {
-      if (results.can_edit) {
+      if(results.can_edit) {
         $.playlist_mark_private($.cookie('user_id'), true);
         $('.requires_edit, .requires_remove').animate({ opacity: 1.0 }, 400, 'swing', function() {
           $('#description .inactive').css('opacity', 0.4);
@@ -209,18 +223,10 @@ $.extend({
     var check_first = true;
     var prefix = '';
     $.each(position_data, function(index, value) {
-      if(check_first) {
-      console.log('checking for ' + index);
-      console.log($('#playlist_item_' + index).siblings('.playlist'));
-        if($('#playlist_item_' + index).siblings('.playlist').size() > 0) {
-          prefix = $('#playlist_item_' + index).siblings('.playlist:first').find('.number:first').html().replace(/[0-9]*$/, '');
-        } else if($('#playlist_item_' + index).parents('.playlist').size() > 0) {
-        console.log('steph here');
-          prefix = $('#playlist_item_' + index).parents('.playlist:first').find('.number:first').html() + '.';
-        }
+      if(check_first && $('#playlist_item_' + index).parents('.playlist').size() > 0) {
+        prefix = $('#playlist_item_' + index).parents('.playlist:first').find('.number:first').html() + '.';
         check_first = false;
       }
-      console.log('prefix is ' + prefix);
       var current_val = $('#playlist_item_' + index + ' .number:first').html();
       var new_value = prefix + value;
       if(current_val != new_value) {
@@ -351,6 +357,7 @@ $.extend({
         $('.playlists .dd-list .listing').replaceWith(response);
         $('.requires_edit,.requires_remove,.requires_logged_in').animate({ opacity: 1.0 });
         $.update_positions(data.position_data);
+        $.set_nestability_and_editability();
       }, 
       error: function() {
         setTimeout(function() {
@@ -479,22 +486,7 @@ $.extend({
       $('.dd-handle').removeClass('dd-handle').addClass('dd-handle-inactive');
     }
   },
-  dropNested: function(playlist_changed) {
-    console.log(playlist_changed);
-    if(playlist_changed.find('> .dd').size() > 0) {
-      $.dropActivate(playlist_changed.find('> .dd'));
-    } else {
-    ///Failing on nested nested
-    console.log(playlist_changed.find('> .dd-list').nestable('serialize'));
-      $.dropActivate(playlist_changed.find('> .dd-list'));
-    }
-  },
-  dropSingle: function() {
-    console.log($('div.playlists').nestable('serialize')); 
-    $.dropActivate($('div.playlists'));
-  },
-  dropActivate: function(working_playlist) {
-
+  dropActivate: function(working_playlist, playlist_id) {
     if(dropped_item !== undefined) {
       $.cancelItemAdd();
     }
@@ -502,10 +494,13 @@ $.extend({
     var position_update = true; 
     var new_item;
 
-    var order = working_playlist.nestable('serialize');
+    // If playlist has not been nestable yet (e.g. new item), 
+    // it neesd to be called and thrown away
+    var throwaway_order = working_playlist.nestable('serialize');
+    var nested_order = working_playlist.nestable('serialize');
 
     var positions = new Array();
-    $.each(order, function(i, item) {
+    $.each(nested_order, function(i, item) {
       if(item.drop == "new_item") {
         position_update = false;
         new_item = item;
@@ -517,7 +512,7 @@ $.extend({
       $.ajax({
         type: 'post',
         dataType: 'json',
-        url: '/playlists/' + working_playlist.data('playlist_id') + '/position_update',
+        url: '/playlists/' + playlist_id + '/position_update',
         data: {
           playlist_order: positions.join('&')
         },
@@ -535,9 +530,6 @@ $.extend({
 	    var url = $.rootPathWithFQDN() + new_item.type + '/' + new_item.id;
       var listing_el = $('#listing_' + new_item.type + '_' + new_item.id);
 
-console.log('workiing p is ');
-console.log(working_playlist);
-console.log(working_playlist.data('playlist_id'));
       dropped_item = listing_el;
       dropped_original_position = new_item.index + 1; 
 	    $.ajax({
@@ -551,7 +543,7 @@ console.log(working_playlist.data('playlist_id'));
 	      data: {
           klass: new_item.type,
           id: new_item.id,
-	        playlist_id: working_playlist.data('playlist_id'),
+	        playlist_id: playlist_id,
           position: working_playlist.find('> .dd-list > .dd-item').index(listing_el) + 1 
 	      },
 	      success: function(html){

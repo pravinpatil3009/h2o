@@ -303,12 +303,10 @@
             this.placeEl.replaceWith(el);
             this.dragEl.remove();
 
-console.log('playlist changed');
-console.log(playlist_changed);
             if(playlist_changed.size() > 0) {
-              $.dropNested(playlist_changed);
+              $.dropActivate(playlist_changed.find('> .dd'), playlist_changed.data('actual_object_id'));
             } else {
-              $.dropSingle();
+              $.dropActivate($('div.playlists'), $('div.playlists').data('playlist_id'));
             }
 
             this.reset();
@@ -380,19 +378,16 @@ console.log(playlist_changed);
 
                     // check if depth limit has reached
                     depth = this.placeEl.parents(opt.listNodeName).length;
-
-console.log(this.placeEl);
-console.log(prev);
-console.log('parent is');
-console.log(this.placeEl.parent());
+                        
                     if (depth + this.dragDepth <= opt.maxDepth) {
                         // create new sub-level if one doesn't exist
-                        //H2O Customization: check if data.nestable
+                        //H2O Customizations here
                         if (prev.data('nestable') && !list.length) {
                             list = $('<' + opt.listNodeName + '/>').addClass(opt.listClass);
-                            console.log(list);
                             list.append(this.placeEl);
-                            prev.append(list);
+                            var test_node = $('<div>').addClass('dd');
+                            test_node.append(list);
+                            prev.append(test_node); //list);
                             this.setParent(prev);
                         } else {
                             // else append to next level up
@@ -407,6 +402,7 @@ console.log(this.placeEl.parent());
                     next = this.placeEl.next(opt.itemNodeName);
                     if (!next.length) {
                         parent = this.placeEl.parent();
+
                         this.placeEl.closest(opt.itemNodeName).after(this.placeEl);
                         if (!parent.children().length) {
                             this.unsetParent(parent.parent());
@@ -447,6 +443,12 @@ console.log(this.placeEl.parent());
                 if (isNewRoot && opt.group !== pointElRoot.data('nestable-group')) {
                     return;
                 }
+
+                //H2O Customization
+                if(!pointElRoot.parent().data('nestable')) {
+                  return;
+                }
+
                 // check depth limit
                 depth = this.dragDepth - 1 + this.pointEl.parents(opt.listNodeName).length;
                 if (depth > opt.maxDepth) {
