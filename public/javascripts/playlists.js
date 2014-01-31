@@ -9,7 +9,7 @@ $.extend({
     $.each($('.private'), function(i, link) {
       var listitem = $(link).parentsUntil('.listitem').last().parent();
       if(user_id != listitem.data('user_id')) {
-        listitem.find('.additional_details,section.playlists').remove();
+        listitem.find('.additional_details,div.dd').remove();
         if(!can_edit) {
           listitem.find('.rr').remove();
         }
@@ -22,16 +22,17 @@ $.extend({
     }
   },
   set_nestability_and_editability: function() {
-    if(access_results.is_superadmin && false) {
+    if(access_results.is_superadmin) {
       $('li.playlist').data('nestable', true);
     } else if($.cookie('user_id') != null) {
       var editable_playlists = $('li.playlist[data-user_id=' + $.cookie('user_id') + ']');
       editable_playlists.data('nestable', true);
-
-      //TODO: Make editable_playlists nestable
       var editable_items = editable_playlists.find('> .dd > .dd-list > li.listitem');
       var items_to_revoke =  $('li.playlist').not(editable_playlists).not(editable_items);
       items_to_revoke.find('.delete-playlist-item,.edit-playlist-item').remove();
+    }
+    if(access_results.can_edit) {
+      $('div#playlist').data('nestable', true);
     }
   },
   playlist_afterload: function(results) {
@@ -356,6 +357,7 @@ $.extend({
       success: function(response) {
         $('.playlists .dd-list .listing').replaceWith(response);
         $('.requires_edit,.requires_remove,.requires_logged_in').animate({ opacity: 1.0 });
+        $('li#playlist_item_' + data.playlist_item_id + ' .dd').nestable({ group: 1 });
         $.update_positions(data.position_data);
         $.set_nestability_and_editability();
       }, 

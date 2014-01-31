@@ -435,6 +435,10 @@
             var pointElRoot = this.pointEl.closest('.' + opt.rootClass),
                 isNewRoot   = this.dragRootEl.data('nestable-id') !== pointElRoot.data('nestable-id');
 
+            if(this.pointEl.hasClass('dd-item') && this.pointEl.data('nestable') == true && this.pointEl.find('> .wrapper .rr-closed').size() > 0) {
+              this.pointEl.find('> .wrapper .rr-closed').click();
+            }
+
             /**
              * move vertical
              */

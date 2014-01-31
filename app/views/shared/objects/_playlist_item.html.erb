@@ -63,7 +63,7 @@
   </div>
     <% if recursive_level < 4 && item.actual_object_type == 'Playlist' && actual_object -%>
       <% if actual_object.playlist_items.any? -%>
-      <div class="dd">
+      <div class="dd playlists">
         <ol class="dd-list">
         <% actual_object.playlist_items.each_with_index do |nested_item, nested_index| -%>
           <%= render :partial => 'shared/objects/playlist_item',
