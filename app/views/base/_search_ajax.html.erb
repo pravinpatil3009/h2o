@@ -1,8 +1,0 @@
-<% @results.each_hit_with_result do |hit, result| -%>
-<%= render :partial => "shared/objects/#{result.class == Case ? 'case_obj' : result.class.to_s.downcase}",
-           :locals => { :hit => hit, (result.class == Case ? :case_obj : result.class.to_s.downcase.to_sym) => result } %>
-<% end %>
-
-<div id="new_pagination">
-<%= will_paginate @results.hits, :container => false, :previous_label => 'Previous', :next_label => 'Next', :params => { :ajax => 1 } %>
-</div>
