@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <title><%= raw(@page_title) || "H2O Classroom Tools" %></title>
+    <link rel="icon" href="/images/h20-logo.png" type="image/png" />
+
+    <%= stylesheet_link_tag 'jquery.ui.custom', 'ui', 'mobile', 'icons', 'barcode', 
+                            'formtastic', :cache => cache_specifier('all') %>
+
+    <%= custom_stylesheet_link_tags @stylesheets %>
+
+    <%= render 'layouts/google_analytics' %>
+
+    <%= render 'layouts/special_fonts' %> 
+
+</head>
+<body id="<%= body_id %>" class="<%= body_class %>">
+	<section id="shell">
+    <%= render 'layouts/quickbar' %>
+    <%= render 'layouts/nav' %>
+    <div class="wrapper main_wrapper">
+
+    <% if flash[:notice] && !@page_cache %>
+    <p id="notice"><%= flash[:notice] %></p>
+    <% end -%>
+
+    <%= yield %>
+    </div>
+    <%= render :partial => 'layouts/footer' %>
+    <%= render :partial => 'layouts/login' %>
+  </section>
+  <%= render :partial => 'layouts/defect' %>
+  <%= render :partial => "layouts/font_selectors" %>
+
+  <%= javascript_include_tag 'jquery.min.js', 'jquery-ui.min.js', 'fonts', 
+                             'jquery.selectbox-0.6.1.pack', 'jquery.rating.pack', 'modernizr.custom.86311',
+                             'jquery.form', 'jquery.cookie', 'jquery.tabSlideOut.v1.3.js',
+                             'jquery.rule.min', 'jquery.tipsy', 'jquery.hoverIntent',
+                             'mustache', 'ui', 'jquery.address.min', :cache => cache_specifier('all') %>
+  <%= custom_javascript_include_tags @javascripts %>
+
+  <!--[if IE]>
+  <%#= javascript_include_tag 'excanvas.js' %>
+  <![endif]--> 
+
+  <% flash.delete(:error) %>
+  <% flash.delete(:notice) %>
+
+  <script type="text/javascript">
+    var editability_path = '<%= @editability_path || '' %>';
+  </script>
+
+</body>
+</html>
+
